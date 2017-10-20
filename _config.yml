@@ -1,0 +1,139 @@
+#### Exclude
+exclude: [".rvmrc", ".rbenv-version", "README.md", "README_en.md", "Rakefile", "changelog.md"]
+
+#### Code Highlighter
+# 'pygments' is unsupported on GitHub Pages now.
+highlighter: rouge
+
+#### Permalink
+permalink: pretty
+
+#### Markdown Processors
+# 'redcarpet' is unsupported on GitHub Pages now.
+markdown: kramdown
+kramdown:
+    input: GFM
+
+#### Default Attributes
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+
+#### Pagination
+paginate: 10
+
+#### Site
+title :	墨虺の博客
+tagline:	Coder信条：固本浚源
+assets: /assets
+url:
+baseurl:
+
+#### Language
+language: zh-CN    ## blog site languages: en, zh-CN, zh-TW, de
+
+#### Menu
+menu:
+  Home: /
+  Archives: /archives
+  About: /about
+## you can create `tags` and `categories` folders (I had created them already).
+## And create a `index.md` file in each of them.
+## set `front-matter`as
+## layout: tags (or categories)
+## title: tags (or categories)
+## ---
+
+#### Widgets
+widgets:
+- category
+- tag
+- tagcloud
+- links
+- github-card
+- rss
+## provide seven widgets:github-card,category,tag,rss,archive,tagcloud,links,weibo,douban
+
+
+#### RSS
+rss: /atom.xml ## RSS address.
+
+#### Image
+imglogo:
+  enable: true             ## display image logo true/false.
+  src: img/logo.png        ## `.svg` and `.png` are recommended,please put image into the theme folder `/jacman/source/img`.
+favicon: img/favicon.ico   ## size:32px*32px,`.ico` is recommended,please put image into the theme folder `/jacman/source/img`.
+apple_icon:  ## size:114px*114px,please put image into the theme folder `/jacman/source/img`.
+author_img: img/author.png ## size:220px*220px.display author avatar picture.if don't want to display,please don't set this.
+banner_img: #img/banner.jpg ## size:1920px*200px+. Banner Picture
+
+#### index post is expanding or not
+index:
+  expand: true           ## default is unexpanding,so you can only see the short description of each post.
+  excerpt_link: Read More
+
+close_aside: false  #close sidebar in post page if true
+mathjax: true      #enable mathjax if true
+share_to: true #enable share-to buttons if true
+
+#### Author information
+author:
+  name: fly      ## e.g. wuchong Author name
+  intro_line1:  "welcome to my gitpages."    ## your introduction on the bottom of the page
+  intro_line2:  "Coder信条：固本浚源."  ## the 2nd line
+  weibo:      ## e.g. wuchong1014 or 2176287895 for http://weibo.com/2176287895
+  tsina:      ## e.g. 2176287895  Your weibo ID,It will be used in share button.
+  zhihu:      ## e.g. jark  for http://www.zhihu.com/people/jark
+  email:      ## e.g. imjark@gmail.com
+  github:     ## e.g. wuchong for https://github.com/wuchong
+  linkedin:   ## e.g. wuchong1014 for https://www.linkedin.com/in/wuchong1014
+## if you set them, the corresponding  share button will show on the footer
+
+#### Toc
+toc:
+  article: true   ## show contents in article.
+  aside: true     ## show contents in aside.
+## you can set both of the value to true of neither of them.
+## if you don't want display contents in a specified post,you can modify `front-matter` and add `toc: false`.
+
+#### Links
+links:
+  yokiqust's Blog: https://yokiqust.me
+  sumihui's Blog: https://sumihui.github.io
+
+
+#### Share button
+jiathis:
+  enable: false ## if you use jiathis as your share tool,the built-in share tool won't be display.
+  id:    ## e.g. 1889330 your jiathis ID.
+  tsina: ## e.g. 2176287895 Your weibo id,It will be used in share button.
+
+#### Analytics
+google_analytics:
+  enable: false
+  id:        ## e.g. UA-46321946-2 your google analytics ID.
+  site:      ## e.g. wuchong.me your google analytics site or set the value as auto.
+## You MUST upgrade to Universal Analytics first!
+## https://developers.google.com/analytics/devguides/collection/upgrade/?hl=zh_CN
+baidu_tongji:
+  enable: false
+  sitecode:  ## e.g. e6d1f421bbc9962127a50488f9ed37d1 your baidu tongji site code
+cnzz_tongji:
+  enable: false
+  siteid:    ## e.g. 1253575964 your cnzz tongji site id
+
+#### Miscellaneous
+fancybox: true        ## if you use gallery post or want use fancybox please set the value to true.
+totop: true           ## if you want to scroll to top in every post set the value to true
+
+#### Custom Search
+simple_jekyll_search:
+  enable: true
+  fulltext: false
+
+gems:
+ - jemoji
