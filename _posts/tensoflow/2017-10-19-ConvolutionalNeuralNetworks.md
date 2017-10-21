@@ -1,5 +1,5 @@
 ---
-title:	google官方实现的cifar10卷积神经网络源码解析学习
+title:	google官方实现的`cifar10.py` cnn源码
 date: 2017-10-19 19:44:00
 categories: [tensorflow,cnn]
 tags: [tensorflow,python,cnn]
@@ -20,7 +20,7 @@ CIFAR-10 classification is a common benchmark problem in machine learning. The p
 > airplane, automobile, bird, cat, deer, dog, frog, horse, ship, and truck.
 
 ### src code
-build a relatively small convolutional neural network (CNN) for recognizing images. 
+build a relatively small convolutional neural network (CNN) for recognizing images.
 
 使用到的API：
 tf.nn.conv2d
@@ -256,7 +256,9 @@ output=sum(t**2)/2
 对于`add_to_collection(name,value)`，官网API的解释为：
 > Stores `value` in the collection with the given `name`.
 > Note that collections are not sets, so it is possible to add a value to a collection several times.
-这个操作是将执行权重衰减操作后（如果有的话），也就是更新后的权重值加入到计算图中吗？《=== 这句话有待考证，先往后看
+
+`tf.add_to_collection`：把变量放入一个集合，把很多变量变成一个列表.
+这个操作是将执行权重衰减操作后（如果有的话），也就是更新后的权重值加入到losses集合中《=== 这句话有待考证，先往后看
 这个函数实际上返回的就是**巻积核**！！
 
 -----
@@ -416,20 +418,35 @@ google真坑，在APIr1.3里搜索不到这个，反倒是可以通过搜`tf.nn.
 
 > The 4-D input tensor is treated as a 3-D array of 1-D vectors (along the last dimension), and each vector is normalized independently. Within a given vector, each component is divided by the weighted, squared sum of inputs within depth_radius. In detail,
 
-> sqr_sum[a, b, c, d] =
->     sum(input[a, b, c, d - depth_radius : d + depth_radius + 1] ** 2)
+> sqr_sum[a, b, c, d] =sum(input[a, b, c, d - depth_radius : d + depth_radius + 1] ** 2)
+
 > output = input / (bias + alpha * sqr_sum) ** beta
 
 目前对这个的翻译都译为“局部响应归一化”，最早是由Krizhevsky和Hinton在关于ImageNet的论文里面使用的一种数据标准化方法，即使现在，也依然会有不少CNN网络会使用到这种正则手段，
 
+> `depth_radius`：这个值需要自己指定，就是下述公式中的n/2.
+> `bias`：上述公式中的 bias , An offset (usually positive to avoid dividing by 0).
+> `alpha`：上述公式中的 alpha
+> `beta`：上述公式中的 beta
+
 ![local_response_normalization](https://sumihui.github.io/source/images/201710200804lrn.png)
 
-以上是这种归一手段的公式，其中`a`的上标指该层的第几个`feature map`，`a`的下标`x`，`y`表示`feature map的像素位置`，`N`指`feature map的总数量`，公式里的其它参数都是超参（在机器学习的上下文中，超参数是在开始学习过程之前设置值的参数，而不是通过训练得到的参数数据），需要自己指定的。
-这种方法是受到神经科学的启发，激活的神经元会抑制其邻近神经元的活动（侧抑制现象），至于为什么使用这种正则手段，以及它为什么有效，查阅了很多文献似乎也没有详细的解释，可能是由于后来提出的batch normalization手段太过火热，渐渐的就把local response normalization掩盖了吧。
-> `depth_radius`：这个值需要自己指定，就是上述公式中的n/2
-> `bias`：上述公式中的 k , An offset (usually positive to avoid dividing by 0).
-> `alpha`：上述公式中的 α
-> `beta`：上述公式中的 β
+以上是这种归一手段的公式，其中
+- `a`的上标`i`指该层的第几个`feature map`，
+- `a`的下标`x`，`y`表示第`i`个`feature map的像素位置（x,y）`,a整个符号代表该处的值,
+- `n`指`n个相邻feature maps`，公式里的参数k、α、n、β都是超参（hyper parameters,在机器学习的上下文中，超参数是在开始学习过程之前设置值的参数，而不是通过训练得到的参数数据），需要自己指定的。
+
+可以看出,这个函数的功能就是, a^i,x,y需要用他的相邻的map的同位置的值进行normalization,在alexnet中, k=2,n=5,α=10−4,β=0.75
+
+这种方法是受到神经科学的启发，激活的神经元会抑制其邻近神经元的活动（侧抑制现象），至于为什么使用这种正则手段，以及它为什么有效，我暂时无解，后来提出的batch normalization更为常用，我们就先把local response normalization稍稍了解就行了吧。
+
+来看看源码中的归一化操作：
+```python
+norm1 = tf.nn.lrn(pool1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,name='norm1')
+```
+选定第一层池化输出作为输入，对每个特征值，用其周边相邻的4个特征值进行正态化，偏置值初始化为一个不为0的正数，防止分母为零。alpha、beta值的设置技巧暂且不明。
+
+因为输入图片已resize为[24,24,3],所以源码执行到local3处时，pool2输出张量shape为[6,6,3,64]
 
 -----
 
@@ -456,6 +473,21 @@ def loss(logits, labels):
   # decay terms (L2 loss).
   return tf.add_n(tf.get_collection('losses'), name='total_loss')
 ```
+
+献上TensorFlow APIr1.3对`tf.nn.sparse_softmax_cross_entropy_with_logits`的解释:
+```python
+sparse_softmax_cross_entropy_with_logits(_sentinel=None,labels=None,logits=None,name=None)
+```
+> Computes sparse softmax cross entropy between logits and labels,
+> **WARNING**: This op expects unscaled logits, since it performs a softmax on logits internally for efficiency. Do not call this op with the output of softmax, as it will produce incorrect results.
+> * `_sentinel`: Used to prevent positional parameters. Internal, do not use.
+> * `labels`: Tensor of shape [d_0, d_1, ..., d_{r-1}] (where r is rank of labels and result) and dtype int32 or int64. Each entry in labels must be an index in [0, num_classes). Other values will raise an exception when this op is run on CPU, and return NaN for corresponding loss and gradient rows on GPU.
+> * `logits`: Unscaled log probabilities of shape [d_0, d_1, ..., d_{r-1}, num_classes] and dtype float32 or float64.
+
+`tf.get_collection`:从一个集合中取出全部变量（是一个变量列表）.
+`tf.add_n`：把一个列表的元素都依次加起来.
+
+
 ------
 
 #### 源码段 - _add_loss_summaries：
