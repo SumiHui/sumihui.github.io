@@ -484,8 +484,12 @@ sparse_softmax_cross_entropy_with_logits(_sentinel=None,labels=None,logits=None,
 > * `labels`: Tensor of shape [d_0, d_1, ..., d_{r-1}] (where r is rank of labels and result) and dtype int32 or int64. Each entry in labels must be an index in [0, num_classes). Other values will raise an exception when this op is run on CPU, and return NaN for corresponding loss and gradient rows on GPU.
 > * `logits`: Unscaled log probabilities of shape [d_0, d_1, ..., d_{r-1}, num_classes] and dtype float32 or float64.
 
+注意，TensorFlow APIr1.3中提到，labels的每个条目必须是[0, num_classes)中的一个索引。
+
 `tf.get_collection`:从一个集合中取出全部变量（是一个变量列表）.
 `tf.add_n`：把一个列表的元素都依次加起来.
+源码注释已提到，==总的损失定义为交叉熵损失函数值加所有权重==
+
 
 
 ------
@@ -516,11 +520,22 @@ def _add_loss_summaries(total_loss):
 
   return loss_averages_op
 ```
+这一段是对损失值计算滑动平均值，
+
+> `tf.train.ExponentialMovingAverage`有以下几个方法：
+> * __init__(decay,num_updates=None,zero_debias=False,name='ExponentialMovingAverage')
+> * apply(var_list=None)
+> * average(var)
+> * average_name(var)
+> * variables_to_restore(moving_avg_variables=None)
+
+`apply`Returns:An Operation that updates the moving averages.
+
+
 ------
 
 #### 源码段 - train：
 ```python
-
 def train(total_loss, global_step):
   """Train CIFAR-10 model.
   Create an optimizer and apply to all trainable variables. Add moving
@@ -574,6 +589,33 @@ def train(total_loss, global_step):
 
   return train_op
 ```
+没啥可讲，注释挺详细的
+`tf.train.exponential_decay`,The function returns the decayed learning rate. It is computed as:
+> **decayed_learning_rate = learning_rate * decay_rate ^ (global_step / decay_steps)**
+
+If the argument `staircase` is True, then `global_step / decay_steps` is an integer division and the decayed learning rate follows a staircase function.
+`staircase=True`则 the learning rate 以离散时间间隔衰减
+
+> `control_dependencies(control_inputs)`:
+> * `control_inputs`: A list of Operation or Tensor objects which must be executed or computed before running the operations defined in the context. Can also be None to clear the control dependencies.
+
+tf.train.GradientDescentOptimizer中的方法：
+```python
+apply_gradients(
+    grads_and_vars,
+    global_step=None,
+    name=None
+)
+```
+Apply gradients to variables.
+
+This is the second part of minimize(). It returns an Operation that applies gradients.
+
+
+最后一行里：
+>`no_op(name=None)`
+> * Does nothing. Only useful as a placeholder for control edges.
+
 ------
 
 #### 源码段 - maybe_download_and_extract:
@@ -601,6 +643,7 @@ def maybe_download_and_extract():
 
 ```
 
+如果训练数据不存在，则下载并解压输出数据，
 
 ------
 
