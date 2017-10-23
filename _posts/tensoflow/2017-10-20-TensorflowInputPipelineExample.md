@@ -1,5 +1,5 @@
 ---
-title:	TENSORFLOW INPUT PIPELINE EXAMPLE
+title:	Tensorflow input pipeline example
 date: 2017-10-17 19:44:00
 categories: [tensorflow,cnn]
 tags: [tensorflow,python,cnn]

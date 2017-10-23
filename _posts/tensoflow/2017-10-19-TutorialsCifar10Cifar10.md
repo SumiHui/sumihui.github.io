@@ -1,14 +1,14 @@
 ---
-title:	google官方实现的`cifar10.py` cnn源码
+title:	google tutorials cifar10/cifar10.py
 date: 2017-10-19 19:44:00
 categories: [tensorflow,cnn]
-tags: [tensorflow,python,cnn]
+tags: [tensorflow,python,cnn,cifar10]
 ---
 
 ### 1. 任务表 [通过该源码的阅读将掌握什么？]
-- [x] TF多GPU运行计算图的方式
-- [x] TF底层方法、高级特性实现神经网络的方式深入理解掌握
-- [x] InceptionV3源码阅读，注意修改其bash文件（剔除下载imagenet的代码）
+- [O] TF构建网络模型的方式
+- [O] TF底层方法、高级特性实现神经网络的方式深入理解掌握
+- [O] TF设备指派的方式及实现（多GPU运算的基础）
 
 Use TensorFlow to train and evaluate a convolutional neural network (CNN) on both CPU and GPU
 
@@ -23,8 +23,7 @@ CIFAR-10 classification is a common benchmark problem in machine learning. The p
 build a relatively small convolutional neural network (CNN) for recognizing images.
 
 使用到的API：
-tf.nn.conv2d
-
+> tf.nn.conv2d
 ```python
 conv2d(
     input,
@@ -38,20 +37,20 @@ conv2d(
 ```
 Must have strides[0] = strides[3] = 1. For the most common case of the same horizontal and vertices strides, strides = [1, stride, stride, 1].
 
-**Args:**
-> * input: A Tensor. Must be one of the following types: half, float32. A 4-D tensor. The dimension order is interpreted according to the value of data_format, see below for details.
-> * filter: A Tensor. Must have the same type as input. A 4-D tensor of shape [filter_height, filter_width, in_channels, out_channels]
-> * strides: A list of ints. 1-D tensor of length 4. The stride of the sliding window for each dimension of input. The dimension order is determined by the value of data_format, see below for details.
-> * padding: A string from: "SAME", "VALID". The type of padding algorithm to use.
+>**Args:**
+> * `input`: A Tensor. Must be one of the following types: half, float32. A 4-D tensor. The dimension order is interpreted according to the value of data_format, see below for details.
+> * `filter`: A Tensor. Must have the same type as input. A 4-D tensor of shape [filter_height, filter_width, in_channels, out_channels]
+> * `strides`: A list of ints. 1-D tensor of length 4. The stride of the sliding window for each dimension of input. The dimension order is determined by the value of data_format, see below for details.
+> * `padding`: A string from: "SAME", "VALID". The type of padding algorithm to use.
 use_cudnn_on_gpu: An optional bool. Defaults to True.
-> * data_format: An optional string from: "NHWC", "NCHW". Defaults to "NHWC". Specify the data format of the input and output data. With the default format "NHWC", the data is stored in the order of: [batch, height, width, channels]. Alternatively, the format could be "NCHW", the data storage order of: [batch, channels, height, width].
-> * name: A name for the operation (optional).
+> * `data_format`: An optional string from: "NHWC", "NCHW". Defaults to "NHWC". Specify the data format of the input and output data. With the default format "NHWC", the data is stored in the order of: [batch, height, width, channels]. Alternatively, the format could be "NCHW", the data storage order of: [batch, channels, height, width].
+> * `name`: A name for the operation (optional).
 
-**Returns:**
+>**Returns:**
 > A Tensor. Has the same type as input. A 4-D tensor. The dimension order is determined by the value of data_format, see below for details.
 
 
-google 官方提供的cifar-10训练网络实现过程大致如下：
+cifar-10训练网络实现过程大致如下：
 
 > * Model inputs
 > * Model prediction
@@ -105,15 +104,14 @@ FLAGS = parser.parse_args()
 -----
 
 **关于argparse的一些简短介绍：**
-* 代码1：
+> **代码1：**
 ```python
 import argparse
 parser=argparse.ArgumentParser()
 parser.parse_args()
 ```
 这是一个没有任何自定义的文件，运行该文件无结果。
-
-* 代码2：
+> **代码2：**
 ```python
 import argparse
 parser=argparse.ArgumentParser()
@@ -126,7 +124,7 @@ print(args.batch_size)
 [sumihui@DLIG cifar10]$ python argparseTest.py 128
 128
 ```
-* 代码3：
+> **代码3：**
 ```python
 import argparse
 parser=argparse.ArgumentParser()
@@ -141,11 +139,12 @@ None
 [sumihui@DLIG cifar10]$ python argparseTest.py --batch_size 128
 128
 ```
+
 大致了解了这些过后我们再继续往下看
 
 -----
 
-#### 源码段 - 全局变量设定：
+#### src_0 - 全局变量设定：
 ```python
 # Global constants describing the CIFAR-10 data set.
 IMAGE_SIZE = cifar10_input.IMAGE_SIZE
@@ -168,7 +167,7 @@ TOWER_NAME = 'tower'
 DATA_URL = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 ```
 这个提一下`cifar10_input.py`，在`cifar10_input.py`模块中定义了如下的全局变量：
-```python
+>```python
 # Process images of this size. Note that this differs from the original CIFAR
 # image size of 32 x 32. If one alters this number, then the entire model
 # architecture will change and any model would need to be retrained.
@@ -178,9 +177,10 @@ NUM_CLASSES = 10
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 ```
+
 ------
 
-#### 源码段 - _activation_summary：
+#### src_1 - _activation_summary：
 ```python
 def _activation_summary(x):
   """Helper to create summaries for activations.
@@ -202,7 +202,7 @@ def _activation_summary(x):
 
 -----
 
-#### 源码段 - _variable_on_cpu：
+#### src_2 - _variable_on_cpu：
 ```python
 def _variable_on_cpu(name, shape, initializer):
   """Helper to create a Variable stored on CPU memory.
@@ -224,7 +224,7 @@ def _variable_on_cpu(name, shape, initializer):
 
 -----
 
-#### 源码段 - _variable_with_weight_decay：
+#### src_3 - _variable_with_weight_decay：
 ```python
 def _variable_with_weight_decay(name, shape, stddev, wd):
   """Helper to create an initialized Variable with weight decay.
@@ -250,9 +250,10 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 ```
 **L2 Loss**:Computes half the L2 norm of a tensor without the sqrt.
-```python
+>```python
 output=sum(t**2)/2
 ```
+
 对于`add_to_collection(name,value)`，官网API的解释为：
 > Stores `value` in the collection with the given `name`.
 > Note that collections are not sets, so it is possible to add a value to a collection several times.
@@ -263,7 +264,7 @@ output=sum(t**2)/2
 
 -----
 
-#### 源码段 - distorted_inputs：
+#### src_4 - distorted_inputs：
 ```python
 def distorted_inputs():
   """Construct distorted input for CIFAR training using the Reader ops.
@@ -288,7 +289,7 @@ google官方在实现cifar10的巻积时，用的是从数据集网站下载的`
 
 ------
 
-#### 源码段 - inputs：
+#### src_5 - inputs：
 ```python
 def inputs(eval_data):
   """Construct input for CIFAR evaluation using the Reader ops.
@@ -315,7 +316,7 @@ def inputs(eval_data):
 
 -----
 
-#### 源码段 - inference：
+#### src_6 - inference：
 {% highlight python linenos %}
 def inference(images):
   """Build the CIFAR-10 model.
@@ -401,9 +402,23 @@ def inference(images):
   return softmax_linear
 {% endhighlight %}
 
+先用Tensorflow Tutorials中的介绍来梳理结构：
+
+|  Layer Name	|  Description	|
+| --- | --- |
+|  conv1	|  convolution and rectified linear activation.	|
+|  pool1	|  max pooling.	|
+|  norm1	|  local response normalization.	|
+|  conv2	|  convolution and rectified linear activation.	|
+|  norm2	|  local response normalization.	|
+|  pool2	|  max pooling.	|
+|  local3	|  fully connected layer with rectified linear activation.	|
+|  local4	|  fully connected layer with rectified linear activation.	|
+|  softmax_linear	|  linear transformation to produce logits.	|
+
 前面已经说过了，用于记录和统计信息的函数`_activation_summary(x)`先不予理会（比如line 23），
 重点关注下`tf.nn.lrn`:
-```python
+>```python
 local_response_normalization(
     input,
     depth_radius=None,
@@ -413,6 +428,7 @@ local_response_normalization(
     name=None
 )
 ```
+
 google真坑，在APIr1.3里搜索不到这个，反倒是可以通过搜`tf.nn.local_response_normalization`搜到:bowtie:，整个方法返回值和输入值类型一致。
 **Local Response Normalization.**
 
@@ -429,11 +445,11 @@ google真坑，在APIr1.3里搜索不到这个，反倒是可以通过搜`tf.nn.
 > `alpha`：上述公式中的 alpha
 > `beta`：上述公式中的 beta
 
-![local_response_normalization](https://sumihui.github.io/source/images/201710200804lrn.png)
+$$b_{x,y}^i=a_{x,y}^i/({k+α\sum_{j=max(0,i-n/2)}^{min(0,i+n/2)} (a_{x,y}^j)^2})^{β}$$
 
 以上是这种归一手段的公式，其中
 - `a`的上标`i`指该层的第几个`feature map`，
-- `a`的下标`x`，`y`表示第`i`个`feature map的像素位置（x,y）`,a整个符号代表该处的值,
+- `a`的下标`x`，`y`表示第`i`个`feature map的像素位置（x,y）`, $a_{x,y}^i$整个符号代表该处的值,
 - `n`指`n个相邻feature maps`，公式里的参数k、α、n、β都是超参（hyper parameters,在机器学习的上下文中，超参数是在开始学习过程之前设置值的参数，而不是通过训练得到的参数数据），需要自己指定的。
 
 可以看出,这个函数的功能就是, a^i,x,y需要用他的相邻的map的同位置的值进行normalization,在alexnet中, k=2,n=5,α=10−4,β=0.75
@@ -441,16 +457,17 @@ google真坑，在APIr1.3里搜索不到这个，反倒是可以通过搜`tf.nn.
 这种方法是受到神经科学的启发，激活的神经元会抑制其邻近神经元的活动（侧抑制现象），至于为什么使用这种正则手段，以及它为什么有效，我暂时无解，后来提出的batch normalization更为常用，我们就先把local response normalization稍稍了解就行了吧。
 
 来看看源码中的归一化操作：
-```python
+>```python
 norm1 = tf.nn.lrn(pool1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,name='norm1')
 ```
+
 选定第一层池化输出作为输入，对每个特征值，用其周边相邻的4个特征值进行正态化，偏置值初始化为一个不为0的正数，防止分母为零。alpha、beta值的设置技巧暂且不明。
 
 因为输入图片已resize为[24,24,3],所以源码执行到local3处时，pool2输出张量shape为[6,6,3,64]
 
 -----
 
-#### 源码段 - loss：
+#### src_7 - loss：
 ```python
 def loss(logits, labels):
   """Add L2Loss to all the trainable variables.
@@ -494,7 +511,7 @@ sparse_softmax_cross_entropy_with_logits(_sentinel=None,labels=None,logits=None,
 
 ------
 
-#### 源码段 - _add_loss_summaries：
+#### src_8 - _add_loss_summaries：
 ```python
 def _add_loss_summaries(total_loss):
   """Add summaries for losses in CIFAR-10 model.
@@ -529,12 +546,12 @@ def _add_loss_summaries(total_loss):
 > * average_name(var)
 > * variables_to_restore(moving_avg_variables=None)
 
-`apply`Returns:An Operation that updates the moving averages.
+`apply` Returns:An Operation that updates the moving averages.
 
 
 ------
 
-#### 源码段 - train：
+#### src_9 - train：
 ```python
 def train(total_loss, global_step):
   """Train CIFAR-10 model.
@@ -600,15 +617,15 @@ If the argument `staircase` is True, then `global_step / decay_steps` is an inte
 > * `control_inputs`: A list of Operation or Tensor objects which must be executed or computed before running the operations defined in the context. Can also be None to clear the control dependencies.
 
 tf.train.GradientDescentOptimizer中的方法：
-```python
+>```python
 apply_gradients(
     grads_and_vars,
     global_step=None,
     name=None
 )
 ```
-Apply gradients to variables.
 
+Apply gradients to variables.
 This is the second part of minimize(). It returns an Operation that applies gradients.
 
 
@@ -618,7 +635,7 @@ This is the second part of minimize(). It returns an Operation that applies grad
 
 ------
 
-#### 源码段 - maybe_download_and_extract:
+#### src_10 - maybe_download_and_extract:
 ```python
 
 def maybe_download_and_extract():
