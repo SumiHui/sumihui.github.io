@@ -19,6 +19,16 @@ CIFAR-10 classification is a common benchmark problem in machine learning. The p
 
 > airplane, automobile, bird, cat, deer, dog, frog, horse, ship, and truck.
 
+
+| mark	|	File	|	Purpose	|
+|    | --- | --- |
+| [x]   | cifar10_input.py	| Reads the native CIFAR-10 binary file format.	|
+| [O]   | cifar10.py	| Builds the CIFAR-10 model.	|
+| [x]   | cifar10_train.py	| Trains a CIFAR-10 model on a CPU or GPU.	|
+| [x]   | cifar10_multi_gpu_train.py	| Trains a CIFAR-10 model on multiple GPUs.	|
+| [x]   | cifar10_eval.py	| Evaluates the predictive performance of a CIFAR-10 model.	|
+
+
 ### src code
 build a relatively small convolutional neural network (CNN) for recognizing images.
 
@@ -60,7 +70,7 @@ cifar-10训练网络实现过程大致如下：
 [cifar10.py link](https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py)
 
 ---
-#### 源码段 - 导入模块：
+#### src_0 - 导入模块：
 ```python
 from __future__ import absolute_import
 from __future__ import division
@@ -81,7 +91,7 @@ import cifar10_input
 
 -----
 
-#### 源码段 - 命令行参数解析设定：
+#### src_1 - 命令行参数解析设定：
 ```python
 parser = argparse.ArgumentParser()
 
@@ -144,7 +154,7 @@ None
 
 -----
 
-#### src_0 - 全局变量设定：
+#### src_2 - 全局变量设定：
 ```python
 # Global constants describing the CIFAR-10 data set.
 IMAGE_SIZE = cifar10_input.IMAGE_SIZE
@@ -180,7 +190,7 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
 ------
 
-#### src_1 - _activation_summary：
+#### src_3 - _activation_summary：
 ```python
 def _activation_summary(x):
   """Helper to create summaries for activations.
@@ -202,7 +212,7 @@ def _activation_summary(x):
 
 -----
 
-#### src_2 - _variable_on_cpu：
+#### src_4 - _variable_on_cpu：
 ```python
 def _variable_on_cpu(name, shape, initializer):
   """Helper to create a Variable stored on CPU memory.
@@ -224,7 +234,7 @@ def _variable_on_cpu(name, shape, initializer):
 
 -----
 
-#### src_3 - _variable_with_weight_decay：
+#### src_5 - _variable_with_weight_decay：
 ```python
 def _variable_with_weight_decay(name, shape, stddev, wd):
   """Helper to create an initialized Variable with weight decay.
@@ -264,7 +274,7 @@ output=sum(t**2)/2
 
 -----
 
-#### src_4 - distorted_inputs：
+#### src_6 - distorted_inputs：
 ```python
 def distorted_inputs():
   """Construct distorted input for CIFAR training using the Reader ops.
@@ -289,7 +299,7 @@ google官方在实现cifar10的巻积时，用的是从数据集网站下载的`
 
 ------
 
-#### src_5 - inputs：
+#### src_7 - inputs：
 ```python
 def inputs(eval_data):
   """Construct input for CIFAR evaluation using the Reader ops.
@@ -316,7 +326,7 @@ def inputs(eval_data):
 
 -----
 
-#### src_6 - inference：
+#### src_8 - inference：
 {% highlight python linenos %}
 def inference(images):
   """Build the CIFAR-10 model.
@@ -467,7 +477,7 @@ norm1 = tf.nn.lrn(pool1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,name='norm1')
 
 -----
 
-#### src_7 - loss：
+#### src_9 - loss：
 ```python
 def loss(logits, labels):
   """Add L2Loss to all the trainable variables.
@@ -511,7 +521,7 @@ sparse_softmax_cross_entropy_with_logits(_sentinel=None,labels=None,logits=None,
 
 ------
 
-#### src_8 - _add_loss_summaries：
+#### src_10 - _add_loss_summaries：
 ```python
 def _add_loss_summaries(total_loss):
   """Add summaries for losses in CIFAR-10 model.
@@ -551,7 +561,7 @@ def _add_loss_summaries(total_loss):
 
 ------
 
-#### src_9 - train：
+#### src_11 - train：
 ```python
 def train(total_loss, global_step):
   """Train CIFAR-10 model.
@@ -635,7 +645,7 @@ This is the second part of minimize(). It returns an Operation that applies grad
 
 ------
 
-#### src_10 - maybe_download_and_extract:
+#### src_12 - maybe_download_and_extract:
 ```python
 
 def maybe_download_and_extract():

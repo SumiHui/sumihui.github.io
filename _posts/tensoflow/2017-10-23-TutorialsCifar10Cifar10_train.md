@@ -1,6 +1,6 @@
 ---
-title:	google tutorials cifar10/cifar10_train
-date: 2017-10-23 19:44:00
+title:	google tutorials cifar10/cifar10_train.py
+date: 2017-10-23 08:44:00
 categories: [tensorflow,cnn]
 tags: [tensorflow,python,cnn,cifar10]
 ---
@@ -39,7 +39,7 @@ http://tensorflow.org/tutorials/deep_cnn/
 这部分代码属于模型训练部分，模型定义部分请移步搜站内文章 [**TutorialsCifar10Cifar10**]
 
 
-| task	|	File	|	Purpose	|
+| mark	|	File	|	Purpose	|
 |    | --- | --- |
 | [x]   | cifar10_input.py	| Reads the native CIFAR-10 binary file format.	|
 | [x]   |cifar10.py	| Builds the CIFAR-10 model.	|
@@ -146,7 +146,7 @@ def train():
 > `tf.Graph().as_default()`:
 > * Returns a context manager that makes this Graph the default graph.
 
-本例中，
+==本例中，Hook的内容先不展开讲，MonitoredTrainingSession参数填写等留坑==
 
 > `tf.train.SessionRunHook`:
 > > class SessionRunHook
@@ -218,6 +218,37 @@ run(main=None,argv=None)
 
 `tf.app`是通用入口点脚本，通过`run()`方法执行程序
 `tf.app.flags` module: Implementation of the flags interface.
+TensorFlow项目例子中经常出现`tf.app.flags`，它支持应用从命令行接受参数，可以用来指定集群配置等.
+分布式通过`tf.app.run()`运行 ， `main()`调用的时候必须填写一个参数，请看下面例子：
+
+举一个简单的`tf.app.flags`例子，可以指定多个参数和不同默认值：
+```python
+# tf.app.flags example
+import tensorflow as tf
+
+flags=tf.app.flags
+flags.DEFINE_string(flag_name="data_path",default_value='/home/sumihui/dataset',docstring='get directory')
+flags.DEFINE_string("distribute_model",False,'run in distribute model or not')
+
+FLAGS=flags.FLAGS
+
+def main(x):	# 此处的 x 不可获缺，必须有接收参数的变量，可以使用任意其他符合变量命名规则的符号替代 x（如下划线等）
+	FLAGS.distribute_model = True
+    print FLAGS.data_path
+    print FLAGS.distribute_model
+
+if __name__=='__main__':
+    tf.app.run()
+```
+输出结果：
+```python
+/home/sumihui/dataset
+True
+```
+
+执行`main`函数之前首先进行flags的解析，也就是说TensorFlow通过设置flags来传递`tf.app.run()`所需要的参数，我们可以直接在程序运行前初始化flags，也可以在运行程序的时候设置命令行参数来达到传参的目的。
+
+
 
 ------
 
