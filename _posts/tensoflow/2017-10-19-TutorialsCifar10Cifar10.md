@@ -21,7 +21,7 @@ CIFAR-10 classification is a common benchmark problem in machine learning. The p
 
 
 | mark	|	File	|	Purpose	|
-|    | --- | --- |
+|  ---  | --- | --- |
 | [x]   | cifar10_input.py	| Reads the native CIFAR-10 binary file format.	|
 | [O]   | cifar10.py	| Builds the CIFAR-10 model.	|
 | [x]   | cifar10_train.py	| Trains a CIFAR-10 model on a CPU or GPU.	|

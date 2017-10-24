@@ -40,7 +40,7 @@ http://tensorflow.org/tutorials/deep_cnn/
 
 
 | mark	|	File	|	Purpose	|
-|    | --- | --- |
+| ---   | --- | --- |
 | [x]   | cifar10_input.py	| Reads the native CIFAR-10 binary file format.	|
 | [x]   |cifar10.py	| Builds the CIFAR-10 model.	|
 | [O]   |cifar10_train.py	| Trains a CIFAR-10 model on a CPU or GPU.	|
