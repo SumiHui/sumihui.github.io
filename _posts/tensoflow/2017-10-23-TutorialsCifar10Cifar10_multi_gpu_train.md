@@ -131,7 +131,6 @@ scope命名空间区分了不同的tower，`cifar10.loss`已在前一篇博文�
 
 ----
 #### src_2 - average_gradients：
-```python
 {% highlight python linenos %}
 def average_gradients(tower_grads):
   """Calculate the average gradient for each shared variable across all towers.
@@ -170,7 +169,6 @@ def average_gradients(tower_grads):
     average_grads.append(grad_and_var)
   return average_grads
 {% endhighlight %}
-```
 
 >`tf.expand_dims`
 >
