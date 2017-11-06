@@ -127,10 +127,12 @@ def tower_loss(scope, images, labels):
   return total_loss
 ```
 
+scope命名空间区分了不同的tower，`cifar10.loss`已在前一篇博文中讲述过了，它会将一个批次计算好的损失值存放在key值为 `losses` 的集合中，将 `losses` 集合中所有元素通过 `tf.add_n` 加起来就是当前这个tower的总损失值(注意：这个losses集合中可不单单只有计算交叉熵所得loss，还有其他地方如权重衰减值也加入了这个集合中，所有才要使用tf.add_n求和，具体请回看前篇cifar10.py的解析)，最后的for循环是将 `losses` 的每一项 和 `total_loss` 这一项 输出到记录文件中。
 
 ----
 #### src_2 - average_gradients：
 ```python
+{% highlight python linenos %}
 def average_gradients(tower_grads):
   """Calculate the average gradient for each shared variable across all towers.
 
@@ -167,7 +169,34 @@ def average_gradients(tower_grads):
     grad_and_var = (grad, v)
     average_grads.append(grad_and_var)
   return average_grads
+{% endhighlight %}
 ```
+
+>`tf.expand_dims`
+>
+Inserts a dimension of 1 into a tensor's shape.
+>Given a tensor input, this operation inserts a dimension of 1 at the dimension index axis of input's shape. The dimension index axis starts at zero; if you specify a negative number for axis it is counted backward from the end.
+>
+This operation is useful if you want to add a batch dimension to a single element. For example, if you have a single image of shape [height, width, channels], you can make it a batch of 1 image with expand_dims(image, 0), which will make the shape [1, height, width, channels].
+>
+Other examples:
+>```python
+# 't' is a tensor of shape [2]
+shape(expand_dims(t, 0)) ==> [1, 2]
+shape(expand_dims(t, 1)) ==> [2, 1]
+shape(expand_dims(t, -1)) ==> [2, 1]
+>
+# 't2' is a tensor of shape [2, 3, 5]
+shape(expand_dims(t2, 0)) ==> [1, 2, 3, 5]
+shape(expand_dims(t2, 2)) ==> [2, 3, 1, 5]
+shape(expand_dims(t2, 3)) ==> [2, 3, 5, 1]
+```
+
+这段函数，读取了每一个tower结构训练完成一个批次时返回的梯度、变量，每一个grad_and_vars其shape都形如`[[grad0_gpu0,var0_gpu0]...[grad0_gpuN,var0_gpuN]]`(视为一个 Nx2 的矩阵),可以看到，只有**第`0`列**具有**可加性**，所以，通过解压赋值，以 `g` 获取第 `0` 列的值('g' is a tensor of shape [grad0_gpuN])，在使用`tf.expand_dims(g,0)`扩展维度后变为`[1,grad0_gpuN]`,扩展维度的目的只是为了能够表明这是一个tower输出的，然后通过`tf.concat`联结共享变量在各个tower上的梯度值，并求平均值，grad is a tensor of shape [1,grad_avg]
+
+**-------------------咳咳，敲黑板划重点！！-----------------**
+
+【注意】tensorflow 官方例程中实现的多GPU并行计算是采取的`数据并行`模式。这意味着每个tower都是复用了同一个model，变量是在多个tower之间共享的，也就是说，变量是有冗余的！如同我们的命名中表现出来的，var0_gpu0、var0_gpu1、var0_gpuN，变量var0在N个GPU设备上共享。本例中，`v` 取了第一个tower（第一个GPU设备）的variable作为新的变量名，将前面求出的梯度平均值 `grad` 与 `v`先构成元组`grad_and_var`,谨记，这个元组的形如 `([1, grad_avg], var0_gpu0)`,这样就完成了一个批次的平均梯度计算。
 
 ----
 #### src_3 - train()：
@@ -302,6 +331,12 @@ def train():
 
 ```
 
+我们先只看从 Calculate the gradients for each model tower.部分开始的代码，先观察数据如何分配到实际设备上的，其中语句`tf.get_variable_scope().reuse_variables()`注释说是为下一个tower重用变量做准备，然而我注释掉这行语句并没有观察到VariableScope object在各个tower上不一致的现象(暂标记未理解，哪位大神知道的话可以告诉我啊，点击右上方About查看交流方式联系我奥，嘻嘻)。
+`grads=tf.train.GradientDescentOptimizer(lr).compute_gradients(loss)`,这个，好像做了什么不言而喻啊。but，too young too naive，我们重点关注 `compute_gradients` 的返回值，
+
+>A list of (gradient, variable) pairs. Variable is always present, but gradient can be None.
+
+看见没，看见没，它返回来元组对 `(gradient, variable)` 构成的 list ！也许在看到这之前，你还对前一个定义的函数 `def average_gradients(tower_grads)` 中tower_grads的元素构成感到狐疑，现在想必是豁然开朗了。
 
 ----
 
@@ -322,6 +357,3 @@ if __name__ == '__main__':
 此处参详上一篇对cifar10_train.py的介绍
 
 ------
-
-
-
