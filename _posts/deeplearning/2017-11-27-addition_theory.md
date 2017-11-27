@@ -6,8 +6,8 @@ tags: [deeplearning]
 ---
 
 ### 摘要
-
 尺度空间、数据中心化等
+
 
 <!-- more -->
 
@@ -32,10 +32,10 @@ tags: [deeplearning]
 对于多尺度问题，会涉及到很多数学上的东西，然而目前并不需要这些，我们只需要了解基本的概念
 如果有兴趣，这篇文章介绍了尺度空间理论<sup>[1]</sup>,之所以引入尺度这个概念，其实是为了更贴近人类的视觉系统。在某些特征检测提取算法中（如sift等），用到的某些算子会对图像的某些信息作出反应，例如图像当中像素点快速变化的一些区域（一般就是图像当中的一些边缘信息），然后记录下来，形成该图的一组特征。但是某些时候我们的图往往是不能确定大小的（这个大小，也可以理解为相同大小时候，图像的模糊程度），需要做的就是在图像不同大小时，算法都能有效的提出相同的关键点。
 
-![cat_big](https://sumihui.github.io/source/images/201711271534_1.jpg)
-![cat_middle](https://sumihui.github.io/source/images/201711271534_2.jpg)
-![cat_small](https://sumihui.github.io/source/images/201711271534_3.jpg)
-![cat_little](https://sumihui.github.io/source/images/201711271534_4.jpg)
+![cat_1](https://sumihui.github.io/source/images/201711271534_1.jpg)
+![cat_4](https://sumihui.github.io/source/images/201711271534_2.jpg)
+![cat_3](https://sumihui.github.io/source/images/201711271534_3.jpg)
+![cat_4](https://sumihui.github.io/source/images/201711271534_4.jpg)
 
 由此，我们需要对一张图，生成一组由清晰逐渐变模糊的一组图像，这就是图像的多尺度。总的来说，多尺度模拟了不同远近的物体在视网膜上的形成。而尺度不变性保证不同远近物体可以对视觉神经有相同的刺激。
 
@@ -45,8 +45,8 @@ tags: [deeplearning]
 
 #### 链接地址：
 
-> 1. [尺度空间理论]: http://blog.csdn.net/xiaowei_cqu/article/details/8067881
-> 2. [多尺度问题]: http://blog.csdn.net/mao_xiao_feng/article/details/53350798
+> 1. [尺度空间理论](http://blog.csdn.net/xiaowei_cqu/article/details/8067881)
+> 2. [多尺度问题](http://blog.csdn.net/mao_xiao_feng/article/details/53350798)
 
 
 ------
